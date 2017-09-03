@@ -151,3 +151,95 @@ end
 
 migration fileを編集後`rake db:migrate`を実行
 もし、すでにユーザを新規登録していた場合はRailsコンソールを立ち上げて`User.delete_all`で全部削除
+
+
+# トピック機能を作成
+
+- controller作成
+```bash
+$ rails g controller topic index
+```
+
+- model作成
+```bash
+$ rails g model topic photo:string comment:text
+```
+
+# 画像アップローダーとしてcarrierwaveとmini_magickをインストールする
+
+- homebrewにimagemagickをインストールする（すでに入っていれば必要ない）
+```bash
+$ brew update 
+$ brew install imagemagick
+```
+
+- carrierwaveとmini_magickをインストールする
+```bash
+$ echo "gem 'carrierwave'" >> Gemfile
+$ echo "gem 'mini_magick'" >> Gemfile
+$ bundle install --path vendor/bundle
+```
+
+- carrierwaveの初期設定を行う。
+```bash
+$ rails generate uploader Photo
+```
+
+- models/topic.rbにcarrierwave用の設定を行う
+```ruby
+mount_uploader :photo, PhotoUploader
+```
+
+- 画像のリサイズ
+`app/uploaders/photo_uploader.rb`に以下を記載
+```ruby
+include CarrierWave::MiniMagick
+process resize_to_limit: [600, 600]
+```
+
+- 投稿するviewに以下を記載
+`app/views/topic/_form.html.erb`
+```
+<%= f.file_field :photo %>
+<%= f.hidden_field :photo_cache %><!-- バリデーションエラー時の対策 -->
+```
+
+- 一覧画面に投稿画像を表示
+`app/views/topic/index.html.erb`
+```
+<% @topics.each do |topic| %>
+  <%= image_tag(topic.photo, alt: '') %>
+  <p><%= topic.comment %></p>
+<% end %>
+```
+
+- 一連のCURD処理を作成
+
+`〜省略〜`
+
+- 画像アップロード時にプレビューできるようにjsを書く
+
+`app/assets/javascripts/picture.js`
+```javascript
+var picUpLoadButton = document.querySelector('.js-picUpLoadButton');
+var previewImg = document.querySelector('.js-previewPhoto');
+
+picUpLoadButton && picUpLoadButton.addEventListener('change', function (e) {
+  var file = e.target.files[0];
+  var reader = new FileReader();
+
+  reader.onload = (function(file) {
+    return function(e) {
+      previewImg.src = e.target.result;
+    };
+  })(file);
+  reader.readAsDataURL(file);
+});
+```
+
+`app/views/topic/_form.html.erb`
+```
+<div class="topic-preview">
+  <%= image_tag(@topic.photo, alt: '', class: 'js-previewPhoto') %>
+</div>
+```

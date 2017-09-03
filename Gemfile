@@ -44,3 +44,8 @@ group :development, :test do
 end
 
 gem 'devise'
+gem 'pry-rails'
+gem 'better_errors'
+gem 'twitter-bootstrap-rails'
+gem 'carrierwave'
+gem 'mini_magick'

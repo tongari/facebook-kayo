@@ -1,0 +1,42 @@
+<%= form_for(@topic, url:choose_new_or_edit) do |f| %>
+
+  <% if @topic.errors.any? %>
+    <div class="alert alert-danger">
+      <p><%= @topic.errors.full_messages.count %>件のエラーがあります。</p>
+      <ul>
+        <% @topic.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="panel panel-default">
+    <div class="panel-heading text-center">
+      <% if isEdit %>
+        <%= f.label :投稿の編集 %>
+      <% else %>
+        <%= f.label :投稿 %>
+      <% end %>
+    </div>
+    <div class="panel-body">
+      <div class="topic-preview">
+        <%= image_tag(@topic.photo, alt: '', class: 'js-previewPhoto') %>
+      </div>
+      <%= f.file_field :photo , class:'topic__upLoader js-picUpLoadButton' %>
+      <%= f.hidden_field :photo_cache %><!-- バリデーションエラー時の対策 -->
+      <%= f.text_area :comment, rows: 6, class: 'form-control js-text-area', placeholder: 'いまなにしてはる？' %>
+      <p class="text-right"><span class="js-count-text">0</span> / 140</p>
+      <div class="text-center">
+        <%= f.submit :投稿, class: 'btn btn-primary' %>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<p class="text-right">
+  <%= link_to topic_index_path do %>
+    <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+    <span>一覧に戻る</span>
+  <% end %>
+</p>

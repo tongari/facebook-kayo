@@ -1,0 +1,66 @@
+// Place all the styles related to the topic controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+.topic-preview{
+  max-width: 300px;
+
+  > img {
+    display: none;
+    width: 100%;
+  }
+
+  .is-show{
+    display: block;
+  }
+
+}
+
+.topic{
+  max-width: 600px;
+  min-width: 300px;
+  margin: 40px auto auto auto;
+  padding: 0 40px;
+  text-align: center;
+
+  &__upLoader{
+    display: inline-block;
+    margin: 20px 0;
+  }
+}
+
+.topicList{
+  max-width: 600px;
+  min-width: 300px;
+  margin: 40px auto auto auto;
+
+  &__photo{
+    text-align: center;
+    margin: 20px 0 40px 0;
+
+    > img{
+      width: 100%;
+    }
+  }
+
+  &__user{
+    display: table;
+    width: 100%;
+    > * {
+      display: table-cell;
+    }
+
+    &Thumb{
+      width: 60px;
+    }
+
+    &Comment{
+      padding-left: 10px;
+    }
+  }
+
+  &__notice{
+    width: 60%;
+    margin: 0 auto 20px auto;
+    text-align: center;
+  }
+}
