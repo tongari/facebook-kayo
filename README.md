@@ -165,7 +165,7 @@ $ rails g controller topic index
 $ rails g model topic photo:string comment:text
 ```
 
-# 画像アップローダーとしてcarrierwaveとmini_magickをインストールする
+## 画像アップローダーとしてcarrierwaveとmini_magickをインストールする
 
 - homebrewにimagemagickをインストールする（すでに入っていれば必要ない）
 ```bash
@@ -219,7 +219,7 @@ process resize_to_limit: [600, 600]
 
 - 画像アップロード時にプレビューできるようにjsを書く
 
-`app/assets/javascripts/picture.js`
+`app/assets/javascripts/topic.js`
 ```javascript
 var picUpLoadButton = document.querySelector('.js-picUpLoadButton');
 var previewImg = document.querySelector('.js-previewPhoto');
@@ -242,4 +242,19 @@ picUpLoadButton && picUpLoadButton.addEventListener('change', function (e) {
 <div class="topic-preview">
   <%= image_tag(@topic.photo, alt: '', class: 'js-previewPhoto') %>
 </div>
+```
+
+
+# アソシエーション
+
+- Topicモデルに`user_id`カラムを追加
+```bash
+$ rails g migration AddUserIdToTopics user_id:integer
+```
+
+- UserモデルのレコードがTopicモデルのレコードを複数もつことを定義する
+
+`app/models/user.rb`
+```ruby
+has_many :topics
 ```
