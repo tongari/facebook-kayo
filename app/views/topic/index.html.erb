@@ -16,12 +16,18 @@
       <p><%= topic.comment %></p>
 
       <div class="text-right">
-        <%= link_to edit_topic_path(topic.id) do %>
+        
+        <% if topic.user_id == @curUserId %>
+          <%= link_to edit_topic_path(topic.id) do %>
             <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+          <% end %>
+
+          <%= link_to topic_path(topic.id), method: :delete ,data: { confirm: '本当に削除していいですか？' } do %>
+              <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+          <% end %>
         <% end %>
-        <%= link_to topic_path(topic.id), method: :delete ,data: { confirm: '本当に削除していいですか？' } do %>
-            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
-        <% end %>
+          
+
       </div>
       
     </div>

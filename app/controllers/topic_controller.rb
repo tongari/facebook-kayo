@@ -1,9 +1,11 @@
 class TopicController < ApplicationController
 
   before_action :set_topic, only:[ :edit, :update, :destroy]
+  before_action :checkMatchUser, only:[:edit, :destroy]
 
   def index
     @topics = Topic.all;
+    @curUserId = current_user.id
   end
 
   def new
@@ -16,6 +18,7 @@ class TopicController < ApplicationController
 
   def create
     @topic = Topic.new(topic_params)
+    @topic.user_id = current_user.id
     if @topic.save
       redirect_to topic_index_path, notice: '投稿しました！'
     else
@@ -46,6 +49,12 @@ class TopicController < ApplicationController
 
     def set_topic
       @topic = Topic.find(params[:id])
+    end
+
+    def checkMatchUser
+      if current_user.id != @topic.user_id
+        redirect_to topic_index_path
+      end
     end
 
 end

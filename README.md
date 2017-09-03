@@ -258,3 +258,29 @@ $ rails g migration AddUserIdToTopics user_id:integer
 ```ruby
 has_many :topics
 ```
+
+
+# 自分の投稿にだけ、編集と削除をさせる
+
+`app/views/topic/index.html.erb`
+```
+<% if topic.user_id == @curUserId %>
+  <%= link_to edit_topic_path(topic.id) do %>
+    <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+  <% end %>
+
+  <%= link_to topic_path(topic.id), method: :delete ,data: { confirm: '本当に削除していいですか？' } do %>
+      <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+  <% end %>
+<% end %>
+```
+
+`app/controllers/topic_controller.rb`
+```ruby
+def checkMatchUser
+  if current_user.id != @picture.user_id
+    redirect_to picture_index_path
+  end
+end
+```
+など

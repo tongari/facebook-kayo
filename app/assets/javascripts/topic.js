@@ -2,7 +2,6 @@ var picUpLoadButton = document.querySelector('.js-picUpLoadButton');
 var previewImg = document.querySelector('.js-previewPhoto');
 
 picUpLoadButton && picUpLoadButton.addEventListener('change', function (e) {
-  debugger;
   var file = e.target.files[0];
   var reader = new FileReader();
 
