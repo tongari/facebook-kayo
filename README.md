@@ -36,3 +36,51 @@ $ echo '/vendor/bundle' >> .gitignore
 $ echo '.env' >> .gitignore
 $ echo '.idea/' >> .gitignore
 ```
+
+# ログイン機能を作成
+
+- deviseをインストールする
+```bash
+$ echo "gem 'devise'" >> Gemfile
+$ bundle install --path vendor/bundle
+```
+
+- deviseに必要な初期設定とそのファイルを生成
+```bash
+$ rails generate devise:install
+```
+
+- Userモデルを作成する
+```bash
+$ rails g devise user
+$ rake db:migrate
+```
+
+- Viewを作成する
+```bash
+$ rails generate devise:views
+```
+
+
+# Deviseのエラーメッセージを日本語化する
+
+- デフォルトの設定を日本語にする
+
+`config/application.rb`に以下を記載
+```ruby
+config.i18n.default_locale = :ja
+```
+
+- 日本語の辞書ファイルを作成する
+
+`config/locales/devise.ja.yml`を作成
+`config/locales/devise.ja.yml`に日本語に翻訳された辞書をセット
+
+[参考辞書リストはこちら](https://gist.github.com/kaorumori/7276cec9c2d15940a3d93c6fcfab19f3)
+
+
+# バリデーションエラーメッセージの日本語化
+
+`config/locales/ja.yml`を作成
+
+[参考辞書リストはこちら](https://github.com/svenfuchs/rails-i18n/blob/master/rails/locale/ja.yml)
