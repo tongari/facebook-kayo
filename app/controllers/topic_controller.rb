@@ -6,6 +6,7 @@ class TopicController < ApplicationController
   def index
     @topics = Topic.all;
     @curUserId = current_user.id
+    @users = User.all
   end
 
   def new

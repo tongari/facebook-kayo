@@ -6,6 +6,12 @@
   <div class="field">
     <%= f.label :email %><br />
     <%= f.email_field :email, autofocus: true %>
+
+    <!-- 名前入力用のフィールドを追加 -->
+    <div class="field">
+      <%= f.label :名前 %><br />
+      <%= f.text_field :name %>
+    </div>
   </div>
 
   <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>

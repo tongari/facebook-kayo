@@ -284,3 +284,61 @@ def checkMatchUser
 end
 ```
 など
+
+
+# UserとTopicをひも付けて誰がTopicを投稿したか分かるようする
+
+- Userモデルに名前用のカラムを追加
+```bash
+$ rails g migration AddNameToUsers name:string
+$ rake db:migrate
+```
+
+- Deviseのストロングパラメータにnameを追加
+
+`app/controllers/application_controller.rb`
+以下を追加
+```ruby
+# before_actionで定義したメソッドを実行
+before_action :configure_permitted_parameters, if: :devise_controller?
+
+#変数PERMISSIBLE_ATTRIBUTESに配列[:name]を代入
+PERMISSIBLE_ATTRIBUTES = %i(name)
+
+protected
+  #deviseのストロングパラメーターにカラム追加するメソッドを定義
+  def configure_permitted_parameters
+    devise_parameter_sanitizer.permit(:sign_up, keys: PERMISSIBLE_ATTRIBUTES)
+    devise_parameter_sanitizer.permit(:account_update, keys: PERMISSIBLE_ATTRIBUTES)
+  end
+```
+
+- 新規ユーザ登録画面に名前の入力用のフィールドを追加
+
+`app/views/devise/registrations/new.html.erb`
+```
+<div class="field">
+  <%= f.email_field :email, autofocus: true, placeholder: "メールアドレス" %>
+</div>
+
+<!-- 名前入力用のフィールドを追加 -->
+<div class="field">
+  <%= f.text_field :name, placeholder: "名前" %>
+</div>
+```
+
+- ユーザ編集画面に名前の入力用のフィールドを追加
+
+`app/views/devise/registrations/edit.html.erb`
+```
+<div class="field">
+  <%= f.label :メールアドレス %><br />
+  <%= f.email_field :email, autofocus: true %>
+</div>
+
+<!-- 名前入力用のフィールドを追加 -->
+<div class="field">
+  <%= f.label :名前 %><br />
+  <%= f.text_field :name %>
+</div>
+```
