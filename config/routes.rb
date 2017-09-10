@@ -1,12 +1,15 @@
 Rails.application.routes.draw do
 
+  get 'relationships/create'
+
+  get 'relationships/destroy'
+
   # resources :topic, only: [:index, :new, :create, :edit, :update ,:destroy]
   resources :topic do
     resources :comments do
       post :confirm, on: :collection
     end
   end
-
 
   devise_for :users, controllers: {
     registrations: "users/registrations",
@@ -15,6 +18,10 @@ Rails.application.routes.draw do
   if Rails.env.development?
     mount LetterOpenerWeb::Engine, at: '/letter_opener'
   end
+
+  #devise_forより以下に記述すること
+  resources :users, only: [:index]
+  resources :relationships, only: [:create, :destroy]
 
   root 'application#index'
 

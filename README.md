@@ -988,3 +988,253 @@ module CommentsHelper
   end
 end
 ```
+
+
+# フォロー機能の作成
+
+- フォローする人とフォローされる人との中間テーブルを作成する
+
+```bash
+$ rails g model Relationship follower_id:integer:index followed_id:integer:index
+```
+
+- ユーザーを二度フォローできないようにする
+
+`db/migrate/xxxxxxxxx.rb`
+```ruby
+class CreateRelationships < ActiveRecord::Migration
+  def change
+    create_table :relationships do |t|
+      t.integer :follower_id
+      t.integer :followed_id
+
+      t.timestamps null: false
+    end
+    add_index :relationships, :follower_id
+    add_index :relationships, :followed_id
+    add_index :relationships, [:follower_id, :followed_id], unique: true
+  end
+end
+```
+
+```bash
+$ rake db:migrate
+```
+
+### テーブルとの関係性を定義する
+
+- Userが複数のRelationShipを持つことを定義する。
+
+`app/models/user.rb`
+```ruby
+class User < ActiveRecord::Base
+#省略
+  has_many :relationships, foreign_key: "follower_id", dependent: :destroy
+  has_many :reverse_relationships, foreign_key: "followed_id", class_name: "Relationship", dependent: :destroy
+#省略
+end
+```
+
+- RelationshipがUserに従属することを定義する
+
+`app/models/relationship.rb`
+```ruby
+class Relationship < ActiveRecord::Base
+  belongs_to :follower, class_name: 'User'
+  belongs_to :followed, class_name: 'User'
+end
+```
+
+- UserモデルがRelationshipモデルを介して複数のUserを所持することを定義する
+
+`app/models/user.rb`
+```ruby
+class User < ActiveRecord::Base
+#省略
+  has_many :followed_users, through: :relationships, source: :followed
+  has_many :followers, through: :reverse_relationships, source: :follower
+end
+```
+
+### ユーザー一覧ページを作成する
+
+- コントローラーとビューを作成
+
+```bash
+$ rails g controller users index
+```
+
+- コントローラを作成した際に、追加された不要なrouteを削除
+`config/routes.rb`
+```ruby
+ get 'users/index' <- 削除する
+```
+
+- routingをresourcesで書き直し
+
+`config/routes.rb`
+```ruby
+ #devise_forより以下に記述すること
+ resources :users, only: [:index]
+```
+
+- userを全て取得
+
+`app/controllers/users_controller.rb`
+```ruby
+class UsersController < ApplicationController
+  def index
+    @users = User.all
+  end
+end
+```
+
+`app/views/users/index.html.erb`
+```
+<div>
+  <h2>ユーザー</h2>
+  <% @users.each do |user| %>
+    <div>
+      <%= profile_img(user) %>
+      <%= user.email %>
+      <%= render 'follow_form', user: user %>
+    </div>
+  <% end %>
+</div>
+```
+
+### follow機能を作成する
+
+- Routingを作成する
+
+`config/routes.rb`
+```ruby
+resources :relationships, only: [:create, :destroy]
+```
+
+- Controllerを作成する
+```bash
+$ rails g controller Relationships create destroy
+```
+
+- フォローボタンを作成する
+
+```bash
+$ touch app/views/users/_follow_form.html.erb
+```
+<div id="follow_form_<%= user.id %>">
+  <% unless current_user.following?(user) %>
+    <%= form_for(current_user.relationships.build(followed_id: user.id), remote: true) do |f| %>
+      <%= f.hidden_field :followed_id %>
+      <%= f.submit "フォロー", class: "btn btn-large btn-primary" %>
+    <% end %>
+  <% end %>
+</div>
+```
+
+- フォローフォームをユーザー一覧ページから呼び出す。
+
+`app/views/users/index.html.erb`
+```
+省略
+<% @users.each do |user| %>
+省略
+  <%= render 'follow_form', user: user %>
+<% end %>
+省略
+```
+
+- createメソッドの処理を実装する
+
+`app/controllers/relationships_controller.rb`
+```ruby
+class RelationshipsController < ApplicationController
+  before_action :authenticate_user!
+  respond_to :js
+
+  def create
+    @user = User.find(params[:relationship][:followed_id])
+    current_user.follow!(@user)
+    respond_with @user
+  end
+end
+```
+
+- フォロー機能に必要な、メソッドを定義する
+
+`app/models/user.rb`
+```ruby
+#省略
+#指定のユーザをフォローする
+def follow!(other_user)
+  relationships.create!(followed_id: other_user.id)
+end
+
+#フォローしているかどうかを確認する
+def following?(other_user)
+  relationships.find_by(followed_id: other_user.id)
+end
+#省略
+```
+
+```bash
+$ touch app/views/relationships/create.js.erb
+```
+```javascript
+$("#follow_form_"+"<%= @user.id %>").html("<%= escape_javascript(render partial: 'users/follow_form', locals: { user: @user } ) %>")
+```
+
+### フォロー解除機能を作成する
+
+- フォロー解除ボタンを実装する
+
+`app/views/users/_follow_form.html.erb`
+```
+<div id="follow_form_<%= user.id %>">
+  <% unless current_user.following?(user) %>
+    <%= form_for(current_user.relationships.build(followed_id: user.id), remote: true) do |f| %>
+      <%= f.hidden_field :followed_id %>
+      <%= f.submit "フォロー", class: "btn btn-large btn-primary" %>
+    <% end %>
+  <% else %>
+    <%= form_for(current_user.relationships.find_by(followed_id: user.id), html: { method: :delete }, remote: true) do |f| %>
+      <%= f.submit "つながりを解除", class: "btn btn-large" %>
+    <% end %>
+  <% end %>
+</div>
+```
+
+- relationshipsのdestroyメソッドを作成する
+
+`app/controllers/relationships_controller.rb`
+```ruby
+#省略
+def destroy
+  @user = Relationship.find(params[:id]).followed
+  current_user.unfollow!(@user)
+  respond_with @user
+end
+#省略
+```
+
+- unfollowメソッドをモデルに定義する
+
+`app/models/user.rb`
+```ruby
+#省略
+#指定のユーザのフォローを解除する
+def unfollow!(other_user)
+  relationships.find_by(followed_id: other_user.id).destroy
+end
+#省略
+```
+
+- ajax処理を作成
+```bash
+$ touch app/views/relationships/destroy.js.erb
+```
+```javascript
+$("#follow_form_"+"<%= @user.id %>").html("<%= escape_javascript(render partial: 'users/follow_form', locals: { user: @user } ) %>")
+```
+
+```

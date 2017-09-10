@@ -1,0 +1,10 @@
+<div>
+  <h2>ユーザー</h2>
+  <% @users.each do |user| %>
+    <div>
+      <%= profile_img(user) %>
+      <%= user.email %>
+      <%= render 'follow_form', user: user %>
+    </div>
+  <% end %>
+</div>
