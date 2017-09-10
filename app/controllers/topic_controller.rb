@@ -1,8 +1,8 @@
 class TopicController < ApplicationController
 
+  before_action :isLogin, only:[:index, :new, :edit]
   before_action :set_topic, only:[ :edit, :update, :destroy]
   before_action :checkMatchUser, only:[:edit, :destroy]
-  before_action :isLogin, only:[:index, :new, :edit]
 
   def index
     @topics = Topic.all;
