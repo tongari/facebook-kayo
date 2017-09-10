@@ -342,3 +342,355 @@ protected
   <%= f.text_field :name %>
 </div>
 ```
+
+# SNSログインの実装
+
+- omniauthをインストール
+
+```bash
+$ echo "gem 'omniauth'" >> Gemfile
+$ echo "gem 'omniauth-twitter'" >> Gemfile
+$ echo "gem 'omniauth-facebook'" >> Gemfile
+$ bundle install --path vendor/bundle
+```
+
+- `:omniauthable`の定義を有効にする
+
+`app/models/user.rb`
+```ruby
+class User < ActiveRecord::Base
+  # Include default devise modules. Others available are:
+  # :confirmable, :lockable, :timeoutable and :omniauthable
+  devise :database_authenticatable, :registerable,
+         :recoverable, :rememberable, :trackable, :validatable, :confirmable, :omniauthable
+# 省略
+end
+```
+
+- ルーティング定義を追加
+
+`/config/routes.rb`
+
+```ruby
+Rails.application.routes.draw do
+  devise_for :users, controllers: {
+    omniauth_callbacks: 'users/omniauth_callbacks'
+  }
+end
+```
+
+- Facebookのアプリ登録
+
+https://developers.facebook.com/
+
+`開発環境用`と`本番用`２つ作成
+
+```
+本番環境（production)のみ、アプリレビューより ☓☓☓を公開しますか？をはいにする
+```
+
+- Twitterのアプリ登録
+
+https://dev.twitter.com/ 
+
+`開発環境用`と`本番用`２つ作成
+
+
+- `config/initializers/devise.rb`に以下を追記
+
+```ruby
+Devise.setup do |config|
+  if Rails.env.production?
+    config.omniauth :facebook, ENV['FACEBOOK_ID_PROD'], ENV['FACEBOOK_SECRET_PROD'], scope: 'email', display: 'popup', info_fields: 'name, email'
+    config.omniauth :twitter, ENV['TWITTER_ID_PROD'], ENV['TWITTER_SECRET_PROD'], scope: 'email', display: 'popup', info_fields: 'name, email'
+  else
+    config.omniauth :facebook, ENV['FACEBOOK_ID_DEV'], ENV['FACEBOOK_SECRET_DEV'], scope: 'email', display: 'popup', info_fields: 'name, email'
+    config.omniauth :twitter, ENV['TWITTER_ID_DEV'], ENV['TWITTER_SECRET_DEV'], scope: 'email', display: 'popup', info_fields: 'name, email'
+  end
+end
+```
+
+### 開発環境用において、dotenvを使用して環境変数化を行う（※.envをgithubにあがらないように.gitignoreに必ず記載する！！！）
+
+- dotenvをインストール
+
+`Gemfile`
+```ruby
+group :development do
+省略
+  gem 'dotenv-rails'
+end
+```
+
+```
+$ bundle install --path vendor/bundle
+```
+- dotenvにIDとAppSecretを記述（開発環境用）
+
+`.env`
+```
+FACEBOOK_ID_DEV={登録したアプリのID}
+FACEBOOK_SECRET_DEV={登録したアプリのapp secret}
+TWITTER_ID_DEV={登録したアプリのID}
+TWITTER_SECRET_DEV={登録したアプリのapp secret}
+```
+
+- SNSログインで必要なカラムをUsersテーブルに追加する
+
+```bash
+$ rails g migration AddOmniauthColumnsToUsers uid provider image_url
+```
+
+```ruby
+class AddOmniauthColumnsToUsers < ActiveRecord::Migration
+  def change
+    add_column :users, :uid, :string, null: false, default: ""
+    add_column :users, :provider, :string, null: false, default: ""
+    add_column :users, :image_url, :string
+
+    add_index :users, [:uid, :provider], unique: true
+  end
+end
+```
+
+- マイグレーション
+
+オプションで`null: false`を設定したので、`rake db:migrate`コマンドではなく`rake db:migrate:reset`コマンドを実行
+
+- FacebookとTwitterのアクションを作成する
+
+```bash
+$ mkdir app/controllers/users
+$ rails g controller users::OmniauthCallbacks
+```
+
+- OmniauthCallbacksControllerの継承元をApplicationControllerからDeviseのコールバックコントローラへ書き換える
+
+`app/controllers/users/omniauth_callbacks_controller.rb`
+
+```ruby
+class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
+end
+```
+
+- Facebookログイン用のメソッドを作成する
+
+`app/controllers/users/omniauth_callbacks_controller.rb`
+
+```ruby
+class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
+  def facebook
+    @user = User.find_for_facebook_oauth(request.env["omniauth.auth"], current_user)
+    if @user.persisted?
+      set_flash_message(:notice, :success, kind: "Facebook") if is_navigational_format?
+      sign_in_and_redirect @user, event: :authentication
+    else
+      session["devise.facebook_data"] = request.env["omniauth.auth"]
+      redirect_to new_user_registration_url
+    end
+  end
+end
+```
+
+- `find_for_facebook_oauth`/`find_for_twitter_oauth`メソッドをuser.rbに定義する
+
+`app/models/user.rb`
+
+```ruby
+class User < ActiveRecord::Base
+#省略
+  def self.find_for_facebook_oauth(auth, signed_in_resource=nil)
+    user = User.find_by(provider: auth.provider, uid: auth.uid)
+
+    unless user
+      user = User.new(
+          name:     auth.extra.raw_info.name,
+          provider: auth.provider,
+          uid:      auth.uid,
+          email:    auth.info.email ||= "#{auth.uid}-#{auth.provider}@example.com",
+          image_url:   auth.info.image,
+          password: Devise.friendly_token[0, 20]
+      )
+      user.skip_confirmation!
+      user.save(validate: false)
+    end
+    user
+  end
+end
+```
+
+`app/controllers/users/omniauth_callbacks_controller.rb`
+
+```ruby
+def twitter
+  # You need to implement the method below in your model
+  @user = User.find_for_twitter_oauth(request.env["omniauth.auth"], current_user)
+
+  if @user.persisted?
+    set_flash_message(:notice, :success, kind: "Twitter") if is_navigational_format?
+    sign_in_and_redirect @user, event: :authentication
+  else
+    session["devise.twitter_data"] = request.env["omniauth.auth"].except("extra")
+    redirect_to new_user_registration_url
+  end
+end
+```
+
+`app/models/user.rb`
+```ruby
+def self.find_for_twitter_oauth(auth, signed_in_resource = nil)
+    user = User.find_by(provider: auth.provider, uid: auth.uid)
+
+    unless user
+      user = User.new(
+          name:     auth.info.nickname,
+          image_url: auth.info.image,
+          provider: auth.provider,
+          uid:      auth.uid,
+          email:    auth.info.email ||= "#{auth.uid}-#{auth.provider}@example.com",
+          password: Devise.friendly_token[0, 20]
+      )
+      user.skip_confirmation!
+      user.save
+    end
+    user
+  end
+```
+
+
+- users/registration_controllerを作成して、deviseのコントローラーを継承する
+
+```bash
+$ rails g controller users::registrations
+```
+
+`app/controllers/users/registration_controller`
+```ruby
+class Users::RegistrationsController < Devise::RegistrationsController
+  def build_resource(hash=nil)
+    hash[:uid] = User.create_unique_string
+    super
+  end
+end
+```
+
+- create_unique_stringメソッドを作成
+
+`app/models/user.rb`
+```ruby
+def self.create_unique_string
+  SecureRandom.uuid
+end
+```
+
+- 継承したregistration_controllerにアクションが起動するようにする
+
+`config/routes.rb`
+```ruby
+devise_for :users, controllers: {
+    registrations: "users/registrations",
+    omniauth_callbacks: "users/omniauth_callbacks"
+}
+```
+
+- ユーザープロフィール用のcarrierwaveの初期設定を行う。
+
+```bash
+$ rails generate uploader Avatar
+```
+
+- ユーザープロフィール画像を保存するためのカラムを作成する
+```bash
+$ rails g migration add_avatar_to_users avatar:string
+$ rake db:migrate
+```
+
+- userモデルに、carrierwave用の設定を行う
+
+`app/models/user.rb`
+```ruby
+mount_uploader :avatar, AvatarUploader #deviseの設定配下に追記
+```
+
+
+- SNSログインから取得してきた画像を表示させるヘルパーメソッドを作成
+
+`app/helpers/application_helper.rb`
+```ruby
+module ApplicationHelper
+  # 省略
+  def profile_img(user)
+    unless user.provider.blank?
+      img_url = user.image_url
+    else
+      img_url = 'def_profile.svg'
+    end
+    image_tag(img_url, alt: user.name)
+  end
+  # 省略
+end
+```
+
+- ユーザー編集ページで画像をアップロードできるようにする
+
+`app/controllers/application_controller.rb`
+```ruby
+class ApplicationController < ActionController::Base
+  # Prevent CSRF attacks by raising an exception.
+  # For APIs, you may want to use :null_session instead.
+  protect_from_forgery with: :exception
+  before_action :configure_permitted_parameters, if: :devise_controller?
+
+  #省略
+
+   PERMISSIBLE_ATTRIBUTES = %i(name avatar avatar_cache)
+
+  protected
+
+    def configure_permitted_parameters
+      devise_parameter_sanitizer.permit(:sign_up, keys: PERMISSIBLE_ATTRIBUTES)
+      devise_parameter_sanitizer.permit(:account_update, keys: PERMISSIBLE_ATTRIBUTES)
+    end
+end
+```
+`avatar avatar_cache` をPERMISSIBLE_ATTRIBUTESに追加する
+
+
+`app/views/devise/registations/edit.html.erb`
+
+```
+<!-- 省略 -->
+  <div class="field">
+    <%= f.label :現在のパスワード %><br />
+    <%= f.password_field :current_password, autocomplete: "off", class: "form-control" %>
+  </div>
+
+  <div class="field">
+    <%= profile_img(@user) if profile_img(@user) %>
+    <%= f.file_field :avatar %>
+    <%= f.hidden_field :avatar_cache %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit "更新", class: "btn btn-primary btn-block" %>
+  </div>
+<% end %>
+<!-- 省略 -->
+```
+
+- omniauthでサインアップしたアカウントのユーザ情報の変更出来るようにする
+
+`app/models/user.rb`
+```ruby
+def update_with_password(params, *options)
+  if provider.blank?
+    super
+  else
+    params.delete :current_password
+    update_without_password(params, *options)
+  end
+end
+```
+update_with_passwordをオーバーライドする。<br>
+providerが空だった時は、superでupdate_with_passwordに記述されている内容を上書きし<br>
+providerが存在する場合は、current_passwordを削除してパスワードなしでも更新できるようにする。

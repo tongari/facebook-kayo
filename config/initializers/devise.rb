@@ -1,6 +1,15 @@
 # Use this hook to configure devise mailer, warden hooks and so forth.
 # Many of these configuration options can be set straight in your model.
 Devise.setup do |config|
+
+  if Rails.env.production?
+    config.omniauth :facebook, ENV['FACEBOOK_ID_PROD'], ENV['FACEBOOK_SECRET_PROD'], scope: 'email', display: 'popup', info_fields: 'name, email'
+    config.omniauth :twitter, ENV['TWITTER_ID_PROD'], ENV['TWITTER_SECRET_PROD'], scope: 'email', display: 'popup', info_fields: 'name, email'
+  else
+    config.omniauth :facebook, ENV['FACEBOOK_ID_DEV'], ENV['FACEBOOK_SECRET_DEV'], scope: 'email', display: 'popup', info_fields: 'name, email'
+    config.omniauth :twitter, ENV['TWITTER_ID_DEV'], ENV['TWITTER_SECRET_DEV'], scope: 'email', display: 'popup', info_fields: 'name, email'
+  end
+
   # The secret key used by Devise. Devise uses this key to generate
   # random tokens. Changing this key will render invalid all existing
   # confirmation, reset password and unlock tokens in the database.
