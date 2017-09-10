@@ -1,6 +1,12 @@
 Rails.application.routes.draw do
-  
-  resources :topic, only: [:index, :new, :create, :edit, :update ,:destroy]
+
+  # resources :topic, only: [:index, :new, :create, :edit, :update ,:destroy]
+  resources :topic do
+    resources :comments do
+      post :confirm, on: :collection
+    end
+  end
+
 
   devise_for :users, controllers: {
     registrations: "users/registrations",

@@ -1,7 +1,7 @@
 class TopicController < ApplicationController
 
   before_action :isLogin, only:[:index, :new, :edit]
-  before_action :set_topic, only:[ :edit, :update, :destroy]
+  before_action :set_topic, only:[:show, :edit, :update, :destroy]
   before_action :checkMatchUser, only:[:edit, :destroy]
 
   def index
@@ -42,6 +42,12 @@ class TopicController < ApplicationController
   def destroy
     @topic.destroy
     redirect_to topic_index_path, notice: '削除しました！'
+  end
+
+  # showアククションを定義します。入力フォームと一覧を表示するためインスタンスを2つ生成します。
+  def show
+    @comment = @topic.comments.build
+    @comments = @topic.comments
   end
 
   private

@@ -694,3 +694,297 @@ end
 update_with_passwordをオーバーライドする。<br>
 providerが空だった時は、superでupdate_with_passwordに記述されている内容を上書きし<br>
 providerが存在する場合は、current_passwordを削除してパスワードなしでも更新できるようにする。
+
+
+# トピックに対してのコメント機能の実装
+
+- ルーティングの定義
+
+```ruby
+resources :topic do
+  resources :comments do
+    post :confirm, on: :collection
+  end
+end
+```
+
+- Commentモデルを生成
+
+```bash
+$ rails g model Comment user:references topic:references content:text
+$ rake db:migrate
+```
+
+- UserモデルとTopicモデルにhas_manyを設定（アソシエーション）
+
+`app/models/user.rb`
+```ruby
+class User < ActiveRecord::Base
+#省略
+  has_many :topics, dependent: :destroy
+  # CommentモデルのAssociationを設定
+  has_many :comments, dependent: :destroy
+#省略
+end
+```
+`app/models/topic.rb`
+```ruby
+class Topic < ActiveRecord::Base
+#省略
+  belongs_to :user
+  # CommentモデルのAssociationを設定
+  has_many :comments, dependent: :destroy
+#省略
+end
+```
+
+- 投稿機能のためのCommentコントローラにcreateアクションを実装
+
+```bash
+$ rails g controller Comments create
+```
+
+- config/routes.rbから以下を削除
+```ruby
+get 'comments/create'
+```
+
+- comments_controller.rbに処理を実装
+
+```ruby
+class CommentsController < ApplicationController
+  # コメントを保存、投稿するためのアクションです。
+  def create
+    # Topicをパラメータの値から探し出し,Topicに紐づくcommentsとしてbuildします。
+    @comment = current_user.comments.build(comment_params)
+    @topic = @comment.topic
+    # クライアント要求に応じてフォーマットを変更
+    respond_to do |format|
+      if @comment.save
+        format.html { redirect_to topic_path(@topic), notice: 'コメントを投稿しました。' }
+      else
+        format.html { render :new }
+      end
+    end
+  end
+
+  private
+  # ストロングパラメーター
+  def comment_params
+    params.require(:comment).permit(:topic_id, :content)
+  end
+end
+```
+
+- 必要ないので`views/comments/create.html.erb`を削除
+
+```bash
+$ rm app/views/comments/create.html.erb
+```
+
+- `app/views/topic/show.html.erb`を作成
+
+```bash
+$ touch app/views/topic/show.html.erb
+```
+```
+<p id="notice"><%= notice %></p>
+<div>
+  <p><%= @topic.comment %></p>
+  <p><%= @topic.created_at.strftime("%y/%m/%d %p %l:%M") %></p>
+    
+  <p>コメント一覧</p>
+  <div id="comments_area">
+    <%= render partial: 'comments/index', locals: { comments: @comments, topic: @topic } %>
+  </div>
+  <%= render partial: 'comments/form', locals: { comment: @comment, topic: @topic } %>
+  <% if current_user.id == @topic.user_id %>
+    <%= link_to '編集', edit_topic_path(@topic) %>
+  <% end %>
+  <%= link_to '戻る', topic_index_path %>
+</div>
+```
+
+
+- コメント入力フォームを作成
+```
+$ touch app/views/comments/_form.html.erb
+```
+```
+<%= form_for([topic,comment]) do |f| %>
+  <% if comment.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= comment.errors.count %>件のエラーがあります。</h2>
+
+      <ul>
+      <% comment.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <%= f.hidden_field :topic_id %>
+  <div class="field">
+    <%= f.text_field :content, placeholder: "内容", class: "form-control"  %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
+```
+
+- コメント一覧を作成
+
+```bash
+$ touch app/views/comments/_index.html.erb
+```
+```
+<ul>
+  <% comments.each do |comment| %>
+    <% unless comment.id.nil? %>
+      <li>
+        <p class="left"><%= comment.user.name %>さんがコメントしました。</p>
+        <p class="left"><%= comment.content %></p>
+        <% if current_user.id == comment.user.id %>
+          <p class="right">
+            <%= link_to '', edit_topic_comment_path(topic, comment), class: "fa fa-pencil-square-o fa-lg" %>
+            <%= link_to '', topic_comment_path(topic, comment), class: "fa fa-trash-o fa-lg", method: :delete, remote: true, data: { confirm: '本当に削除していいですか？' } %>
+          </p>
+        <% end %>
+      </li>
+    <% end %>
+  <% end %>
+</ul>
+```
+
+- `app/controllers/topic_controller.rb`にshowアクションを実装
+```ruby
+ # onlyにshowアクションを追加します。
+  before_action :set_topic, only:[:show, :edit, :update, :destroy]
+ #省略
+  
+  # showアククションを定義します。入力フォームと一覧を表示するためインスタンスを2つ生成します。
+  def show
+    @comment = @topic.comments.build
+    @comments = @topic.comments
+  end
+ #省略
+```
+
+
+- `views/topic/index.html.erb`に詳細画面へのリンクを設定
+
+```
+<%= link_to topic_path(topic.id) do %>
+  <span class="glyphicon glyphicon-detail" aria-hidden="true"></span>
+<% end %>
+```
+
+- 非同期でコメントの投稿・編集・更新・削除をする
+
+`app/views/comments/_form.html.erb`
+```
+<%= form_for([topic, comment], remote: isAsync) do |f| %>
+...省略
+```
+
+`app/controllers/comments_controller.rb`
+
+```ruby
+before_action :set_comment, only: ['edit', 'update', 'destroy']
+  
+  # コメントを保存、投稿するためのアクションです。
+  def create
+    # Topicをパラメータの値から探し出し,Topicに紐づくcommentsとしてbuildします。
+    @comment = current_user.comments.build(comment_params)
+    @topic = @comment.topic
+    # respond_toは、クライアントからの要求に応じてレスポンスのフォーマットを変更します。
+    respond_to do |format|
+      if @comment.save
+        format.html { redirect_to topic_path(@topic), notice: 'コメントを投稿しました。' }
+        # JS形式でレスポンスを返します。
+        format.js { render :index }
+      else
+        format.html { render :new }
+      end
+    end
+  end
+
+  def edit
+    @topic = Topic.find(params[:topic_id])
+  end
+
+  def update
+    @topic = @comment.topic
+    respond_to do |format|
+      if @comment.update(comment_params)
+        format.html { redirect_to topic_path(@topic), notice: 'コメントを更新しました。' }
+      else
+        format.html { render :edit }
+      end
+    end
+  end
+
+  def destroy
+    @topic = @comment.topic
+    respond_to do |format|
+      if @comment.destroy
+        format.html { redirect_to topic_path(@topic), notice: 'コメントを削除しました。' }
+        # JS形式でレスポンスを返します。
+        format.js { render :index }
+      else
+        format.html { render :new }
+      end
+    end
+  end
+
+  private
+    # ストロングパラメーター
+    def comment_params
+      params.require(:comment).permit(:topic_id, :content)
+    end
+
+    def set_comment
+      @comment = Comment.find(params[:id])
+    end
+```
+
+- HTMLを再レンダリングするJSファイルを新規作成
+
+```
+$ touch app/views/comments/index.js.erb
+```
+```javascript
+$("#comments_area").html("<%= j(render 'comments/index', { comments: @comment.topic.comments, topic: @comment.topic }) %>")
+$(':text').val('');
+```
+
+- 編集画面を作成（非同期ではなく同期で編集）
+
+```bash
+$ touch app/views/comments/edit.html.erb
+```
+```
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h4><%= @topic.user.name %>へのコメントを編集</h4></div>
+  <div class="panel-body">
+    <%= render partial: 'comments/form', locals: { comment: @comment, topic: @topic, isEdit: true } %>
+  </div>
+</div>
+```
+
+- 投稿（非同期）/ 編集・更新（同期）にしたいのでヘルパー関数を作成
+
+`app/helpers/comments_helper.rb`
+```ruby
+module CommentsHelper
+  def isAsync
+    if  action_name == 'create'
+      true
+    elsif action_name == 'update'
+      false
+    end
+  end
+end
+```

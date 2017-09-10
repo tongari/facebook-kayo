@@ -1,0 +1,7 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h4><%= @topic.user.name %>へのコメントを編集</h4></div>
+  <div class="panel-body">
+    <%= render partial: 'comments/form', locals: { comment: @comment, topic: @topic, isEdit: true } %>
+  </div>
+</div>

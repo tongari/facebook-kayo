@@ -1,0 +1,15 @@
+<p id="notice"><%= notice %></p>
+<div>
+  <p><%= @topic.comment %></p>
+  <p><%= @topic.created_at.strftime("%y/%m/%d %p %l:%M") %></p>
+
+  <p>コメント一覧</p>
+  <div id="comments_area">
+    <%= render partial: 'comments/index', locals: { comments: @comments, topic: @topic } %>
+  </div>
+  <%= render partial: 'comments/form', locals: { comment: @comment, topic: @topic } %>
+  <% if current_user.id == @topic.user_id %>
+      <%= link_to '編集', edit_topic_path(@topic) %>
+  <% end %>
+  <%= link_to '戻る', topic_index_path %>
+</div>
