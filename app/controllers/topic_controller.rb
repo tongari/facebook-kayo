@@ -2,6 +2,7 @@ class TopicController < ApplicationController
 
   before_action :set_topic, only:[ :edit, :update, :destroy]
   before_action :checkMatchUser, only:[:edit, :destroy]
+  before_action :isLogin, only:[:index, :new, :edit]
 
   def index
     @topics = Topic.all;
@@ -55,6 +56,12 @@ class TopicController < ApplicationController
     def checkMatchUser
       if current_user.id != @topic.user_id
         redirect_to topic_index_path
+      end
+    end
+
+    def isLogin
+      if !user_signed_in?
+        redirect_to new_user_session_path
       end
     end
 

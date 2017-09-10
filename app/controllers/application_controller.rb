@@ -8,11 +8,19 @@ class ApplicationController < ActionController::Base
   #変数PERMISSIBLE_ATTRIBUTESに配列[:name]を代入
   PERMISSIBLE_ATTRIBUTES = %i(name avatar avatar_cache)
 
-  protected
-  #deviseのストロングパラメーターにカラム追加するメソッドを定義
-  def configure_permitted_parameters
-    devise_parameter_sanitizer.permit(:sign_up, keys: PERMISSIBLE_ATTRIBUTES)
-    devise_parameter_sanitizer.permit(:account_update, keys: PERMISSIBLE_ATTRIBUTES)
+  def index
+    if user_signed_in?
+      redirect_to topic_index_path
+    else
+      redirect_to new_user_session_path
+    end
   end
+
+  protected
+    #deviseのストロングパラメーターにカラム追加するメソッドを定義
+    def configure_permitted_parameters
+      devise_parameter_sanitizer.permit(:sign_up, keys: PERMISSIBLE_ATTRIBUTES)
+      devise_parameter_sanitizer.permit(:account_update, keys: PERMISSIBLE_ATTRIBUTES)
+    end
 
 end
