@@ -1122,6 +1122,7 @@ $ rails g controller Relationships create destroy
 ```bash
 $ touch app/views/users/_follow_form.html.erb
 ```
+```
 <div id="follow_form_<%= user.id %>">
   <% unless current_user.following?(user) %>
     <%= form_for(current_user.relationships.build(followed_id: user.id), remote: true) do |f| %>
