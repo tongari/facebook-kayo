@@ -1238,4 +1238,231 @@ $ touch app/views/relationships/destroy.js.erb
 $("#follow_form_"+"<%= @user.id %>").html("<%= escape_javascript(render partial: 'users/follow_form', locals: { user: @user } ) %>")
 ```
 
+
+# メッセージ機能を作成
+
+- ルーティングを設定する
+
+`config/routes.rb`
+```ruby
+resources :conversations do
+  resources :messages
+end
+```
+
+- 会話「conversations」コントローラを作成
+```bash
+$ rails g controller Conversations index create
+```
+
+`config/routes.rb`
+```ruby
+ get 'conversations/index' <- 削除
+ get 'conversations/create'<- 削除
+```
+
+- すべてのユーザと会話一覧を取得と作成
+
+`app/controllers/conversations_controller.rb`
+```ruby
+def index
+  @users = User.all  
+  @conversations = Conversation.all
+end
+
+def create
+    if Conversation.between(params[:sender_id], params[:recipient_id]).present?
+      @conversation = Conversation.between(params[:sender_id], params[:recipient_id]).first
+    else
+      @conversation = Conversation.create!(conversation_params)
+    end
+
+    redirect_to conversation_messages_path(@conversation)
+  end
+```
+
+- メッセージコントローラー作成
+```bash
+$ rails g controller Messages index create
+```
+`config/routes.rb`にできた余計なルーティングを削除
+
+`app/controllers/messages_controller.rb`
+```ruby
+class MessagesController < ApplicationController
+  before_action do
+    @conversation = Conversation.find(params[:conversation_id])
+  end
+
+  def index
+    @messages = @conversation.messages
+    if @messages.length > 10
+      @over_ten = true
+      @messages = @messages[-10..-1]
+    end
+
+    if params[:m]
+      @over_ten = false
+      @messages = @conversation.messages
+    end
+
+    if @messages.last
+      if @messages.last.user_id != current_user.id
+        @messages.last.read = true
+      end
+    end
+
+    @message = @conversation.messages.build
+  end
+
+  def create
+    @message = @conversation.messages.build(message_params)
+    if @message.save
+      redirect_to conversation_messages_path(@conversation)
+    end
+  end
+
+  private
+    def message_params
+      params.require(:message).permit(:body, :user_id)
+    end
+end
+```
+
+- Conversationモデルを作成
+
+```bash
+$ rails g model Conversation sender_id:integer recipient_id:integer
+```
+
+`app/models/conversation.rb`
+```ruby
+class Conversation < ActiveRecord::Base
+  belongs_to :sender, foreign_key: :sender_id, class_name: 'User'
+  belongs_to :recipient, foreign_key: :recipient_id, class_name: 'User'
+  has_many :messages, dependent: :destroy
+  validates_uniqueness_of :sender_id, scope: :recipient_id
+  scope :between, -> (sender_id,recipient_id) do
+    where("(conversations.sender_id = ? AND conversations.recipient_id =?) OR (conversations.sender_id = ? AND  conversations.recipient_id =?)", sender_id,recipient_id, recipient_id, sender_id)
+  end
+
+  def target_user(current_user)
+    if sender_id == current_user.id
+      User.find(recipient_id)
+    elsif recipient_id == current_user.id
+      User.find(sender_id)
+    end
+  end
+end
+```
+
+- Messageモデルを作成する
+
+```bash
+$ rails g model Message body:text conversation:references user:references read:boolean
+```
+
+`app/models/message.rb`
+```ruby
+class Message < ActiveRecord::Base
+  belongs_to :conversation
+  belongs_to :user
+
+  validates_presence_of :body, :conversation_id, :user_id
+  def message_time
+    created_at.strftime("%m/%d/%y at %l:%M %p")
+  end
+end
+```
+
+`db/migrate/xxxxxxxx_create_messages.rb`
+```ruby
+class CreateMessages < ActiveRecord::Migration
+  def change
+    create_table :messages do |t|
+      t.text :body
+      t.references :conversation, index: true, foreign_key: true
+      t.references :user, index: true, foreign_key: true
+      t.boolean :read, default: false
+
+      t.timestamps null: false
+    end
+  end
+end
+```
+
+- 会話「Conversations」ビューを作成する
+
+`app/views/conversations/index.html.erb`
+```
+<div class="wrapper col-md-6 col-md-offset-3 col-sm-10 col-sm-offset-1">
+  <table class="table table-hover">
+    <thead>
+    <h2>メッセージ一覧</h2>
+    </thead>
+    <tbody>
+    <% @conversations.each do |conversation| %>
+        <td>
+          <% if conversation.target_user(current_user).present? %>
+              <%= link_to conversation.target_user(current_user).name, conversation_messages_path(conversation)%>
+          <% end %>
+        </td>
+    <% end %>
+    </tbody>
+  </table>
+</div>
+```
+
+- ユーザ「Users」ビューの修正
+
+`app/views/users/index.html.erb`
+```
+<% if user.id != current_user.id %>
+  <li>
+    <div class="item">
+      <%= link_to user.name, user %>
+      <%= link_to 'メッセージ', conversations_path(sender_id: current_user.id, recipient_id: user.id), method: 'post'%>
+    </div>
+    <%= render partial: 'follow_form', locals: { user: user } if signed_in?   %>
+  </li>
+<% end %>
+```
+
+- メッセージ「Messages」ビューの作成
+
+`app/views/messages/index.html.erb`
+```
+<% if @over_ten %>
+  <%= link_to '以前のメッセージ', '?m=all' %>
+<% end %>
+
+<div class="ui segment">
+  <% @messages.each do |message| %>
+    <% if message.body %>
+      <% user = User.find(message.user_id) %>
+      <div class="item">
+        <div class="content">
+          <div class="header"><strong><%= user.name %></strong> <%= message.message_time %></div>
+          <div class="list">
+            <div class="item">
+              <i class="right triangle icon"></i>
+              <%= message.body %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+</div>
+
+<%= form_for [@conversation, @message], html: {class: "ui reply form"} do |f| %>
+  <div class="field">
+    <%= f.text_area :body, class: "form-control" %>
+  </div>
+    <%= f.text_field :user_id, value: current_user.id, type: "hidden"  %>
+  <div>
+    <%= f.submit "メッセージを送る" %>
+  </div>
+
+<% end %>
 ```

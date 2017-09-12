@@ -1,9 +1,5 @@
 Rails.application.routes.draw do
 
-  get 'relationships/create'
-
-  get 'relationships/destroy'
-
   # resources :topic, only: [:index, :new, :create, :edit, :update ,:destroy]
   resources :topic do
     resources :comments do
@@ -22,6 +18,9 @@ Rails.application.routes.draw do
   #devise_forより以下に記述すること
   resources :users, only: [:index]
   resources :relationships, only: [:create, :destroy]
+  resources :conversations do
+    resources :messages
+  end
 
   root 'application#index'
 
