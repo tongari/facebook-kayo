@@ -1,0 +1,12 @@
+.u {
+  &-block{
+    display: block;
+  }
+  &-inline-block{
+    display: inline-block;
+    max-width: 100%;
+  }
+  &-inline{
+    display: inline;
+  }
+}

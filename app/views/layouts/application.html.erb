@@ -1,14 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>FacebookKayo</title>
+  <title>FacebookKayo?</title>
+  <meta name="robots" content="noindex, nofollow">
   <%= stylesheet_link_tag    'application', media: 'all' %>
   <%= csrf_meta_tags %>
 </head>
 <body>
-<%= link_to 'ログアウト', destroy_user_session_path, method: :delete ,data: { confirm: 'ログアウトしますか？' }, class: '' %>
+<header class="header">
+  <div class="header__body">
+    <% if user_signed_in? %>
+        <%= link_to 'ログアウト', destroy_user_session_path, method: :delete ,data: { confirm: 'ログアウトしますか？' }, class: '' %>
+    <% else %>
+        <p>
+          <img src="<%= asset_path 'f-logo.svg' %>" width="200" alt="">
+        </p>
+    <% end %>
+  </div>
+</header>
 
-<%= yield %>
+<div class="contents">
+  <div class="contents__body">
+    <%= yield %>
+  </div>
+</div>
+
+<footer class="footer">
+  <p>©FacebookKayo?</p>
+  <nav>
+    <li>
+      <a href="https://diveintocode.jp" target="_blank">DIVE INTO CODE</a>
+    </li>
+    <li>
+      <a href="https://diveintocode.jp/secondteam" target="_blank">SECONDTEAM</a>
+    </li>
+    <li>
+      <a href="https://diver.diveintocode.jp/" target="_blank">DIVER</a>
+    </li>
+  </nav>
+</footer>
 
 <%= javascript_include_tag 'application' %>
 </body>

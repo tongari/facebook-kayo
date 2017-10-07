@@ -1,0 +1,51 @@
+@import "config";
+
+.u-text {
+
+  &-size-XS {
+    font-size: $f-font-size-XS;
+  }
+  &-size-S {
+    font-size: $f-font-size-S;
+  }
+  &-size-M {
+    font-size: $f-font-size-M;
+  }
+  &-size-L {
+    font-size: $f-font-size-L;
+  }
+  &-size-LL {
+    font-size: $f-font-size-LL;
+  }
+  &-size-XL {
+    font-size: $f-font-size-XL;
+  }
+
+  &-left {
+    text-align: left;
+  }
+  &-center {
+    text-align: center;
+  }
+  &-right {
+    text-align: right;
+  }
+}
+
+.u{
+  &-text-bold {
+    font-weight: bold;
+  }
+  &-texr-normal{
+    font-weight: normal;
+  }
+  &-text-underline {
+    text-decoration: underline;
+  }
+  &-text-link{
+    color: $f-text-link;
+    &:hover{
+      text-decoration: underline;
+    }
+  }
+}

@@ -1,0 +1,105 @@
+@import "config";
+
+.u-space {
+  //margin-top
+  &-t-XS{
+    margin-top: $f-margin-XS;
+  }
+
+  &-t-S{
+    margin-top: $f-margin-S;
+  }
+
+  &-t-M{
+    margin-top: $f-margin-M;
+  }
+
+  &-t-L {
+    margin-top: $f-margin-L;
+  }
+
+  &-t-LL {
+    margin-top: $f-margin-LL;
+  }
+
+  &-t-XL {
+    margin-top: $f-margin-XL;
+  }
+
+  //margin-bottom
+  &-b-XS{
+    margin-bottom: $f-margin-XS;
+  }
+
+  &-b-S{
+    margin-bottom: $f-margin-S;
+  }
+
+  &-b-M{
+    margin-bottom: $f-margin-M;
+  }
+
+  &-b-L {
+    margin-bottom: $f-margin-L;
+  }
+
+  &-b-LL {
+    margin-bottom: $f-margin-LL;
+  }
+
+  &-b-XL {
+    margin-bottom: $f-margin-XL;
+  }
+
+
+  //margin-left
+  &-l-XS{
+    margin-left: $f-margin-XS;
+  }
+
+  &-l-S{
+    margin-left: $f-margin-S;
+  }
+
+  &-l-M{
+    margin-left: $f-margin-M;
+  }
+
+  &-l-L {
+    margin-left: $f-margin-L;
+  }
+
+  &-l-LL {
+    margin-left: $f-margin-LL;
+  }
+
+  &-l-XL {
+    margin-left: $f-margin-XL;
+  }
+
+  //margin-right
+  &-r-XS{
+    margin-right: $f-margin-XS;
+  }
+
+  &-r-S{
+    margin-right: $f-margin-S;
+  }
+
+  &-r-M{
+    margin-right: $f-margin-M;
+  }
+
+  &-r-L {
+    margin-right: $f-margin-L;
+  }
+
+  &-r-LL {
+    margin-right: $f-margin-LL;
+  }
+
+  &-r-XL {
+    margin-right: $f-margin-XL;
+  }
+
+}

@@ -1,0 +1,57 @@
+@import "config";
+
+@mixin firstChildMargin($size){
+  > * {
+    margin-top: $size;
+
+    &:first-child{
+      margin-top: 0;
+    }
+  }
+}
+
+.c-group {
+
+  &.-border  {
+    > * {
+      border-top: 1px solid #ccc;
+      &:last-child{
+        border-bottom: 1px solid #ccc;
+      }
+    }
+  }
+
+  &__body {
+    display: block;
+    padding: $f-margin-M;
+  }
+
+  &.-space-XXS{
+    @include firstChildMargin($f-margin-XXS);
+  }
+
+  &.-space-XS{
+    @include firstChildMargin($f-margin-XS);
+  }
+
+  &.-space-S{
+    @include firstChildMargin($f-margin-S);
+  }
+
+  &.-space-M{
+    @include firstChildMargin($f-margin-M);
+  }
+
+  &.-space-L{
+    @include firstChildMargin($f-margin-L);
+  }
+
+  &.-space-LL{
+    @include firstChildMargin($f-margin-LL);
+  }
+
+  &.-space-XL{
+    @include firstChildMargin($f-margin-XL);
+  }
+
+}

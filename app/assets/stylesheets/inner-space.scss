@@ -1,0 +1,168 @@
+@import "config";
+
+.u-inner-space {
+
+  //padding vertical
+  &-vt-XS{
+    padding-top: $f-margin-XS;
+    padding-bottom: $f-margin-XS;
+  }
+
+  &-vt-S{
+    padding-top: $f-margin-S;
+    padding-bottom: $f-margin-S;
+  }
+
+  &-vt-M{
+    padding-top: $f-margin-M;
+    padding-bottom: $f-margin-M;
+  }
+
+  &-vt-L {
+    padding-top: $f-margin-L;
+    padding-bottom: $f-margin-L;
+  }
+
+  &-vt-LL {
+    padding-top: $f-margin-LL;
+    padding-bottom: $f-margin-LL;
+  }
+
+  &-vt-XL {
+    padding-top: $f-margin-XL;
+    padding-bottom: $f-margin-XL;
+  }
+
+  //padding horizontal
+  &-hr-XS{
+    padding-left: $f-margin-XS;
+    padding-right: $f-margin-XS;
+  }
+
+  &-hr-S{
+    padding-left: $f-margin-S;
+    padding-right: $f-margin-S;
+  }
+
+  &-hr-M{
+    padding-left: $f-margin-M;
+    padding-right: $f-margin-M;
+  }
+
+  &-hr-L {
+    padding-left: $f-margin-L;
+    padding-right: $f-margin-L;
+  }
+
+  &-hr-LL {
+    padding-left: $f-margin-LL;
+    padding-right: $f-margin-LL;
+  }
+
+  &-hr-XL {
+    padding-left: $f-margin-XL;
+    padding-right: $f-margin-XL;
+  }
+
+  //padding-top
+  &-t-XS{
+    padding-top: $f-margin-XS;
+  }
+
+  &-t-S{
+    padding-top: $f-margin-S;
+  }
+
+  &-t-M{
+    padding-top: $f-margin-M;
+  }
+
+  &-t-L {
+    padding-top: $f-margin-L;
+  }
+
+  &-t-LL {
+    padding-top: $f-margin-LL;
+  }
+
+  &-t-XL {
+    padding-top: $f-margin-XL;
+  }
+
+  //padding-bottom
+  &-b-XS{
+    padding-bottom: $f-margin-XS;
+  }
+
+  &-b-S{
+    padding-bottom: $f-margin-S;
+  }
+
+  &-b-M{
+    padding-bottom: $f-margin-M;
+  }
+
+  &-b-L {
+    padding-bottom: $f-margin-L;
+  }
+
+  &-b-LL {
+    padding-bottom: $f-margin-LL;
+  }
+
+  &-b-XL {
+    padding-bottom: $f-margin-XL;
+  }
+
+
+  //padding-left
+  &-l-XS{
+    padding-left: $f-margin-XS;
+  }
+
+  &-l-S{
+    padding-left: $f-margin-S;
+  }
+
+  &-l-M{
+    padding-left: $f-margin-M;
+  }
+
+  &-l-L {
+    padding-left: $f-margin-L;
+  }
+
+  &-l-LL {
+    padding-left: $f-margin-LL;
+  }
+
+  &-l-XL {
+    padding-left: $f-margin-XL;
+  }
+
+  //padding-right
+  &-r-XS{
+    padding-right: $f-margin-XS;
+  }
+
+  &-r-S{
+    padding-right: $f-margin-S;
+  }
+
+  &-r-M{
+    padding-right: $f-margin-M;
+  }
+
+  &-r-L {
+    padding-right: $f-margin-L;
+  }
+
+  &-r-LL {
+    padding-right: $f-margin-LL;
+  }
+
+  &-r-XL {
+    padding-right: $f-margin-XL;
+  }
+
+}
