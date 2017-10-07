@@ -9,13 +9,18 @@
 <div class="topicList">
   <% @topics.each do |topic| %>
     <div class="well">
-      
-      <div class="topicList__photo">
-        <%= image_tag(topic.photo, alt: '') %>
-      </div>
+
+      <% if !topic.photo.blank? %>
+        <div class="topicList__photo">
+          <%= image_tag(topic.photo, alt: '') %>
+        </div>
+      <% end %>
+
       <p><%= topic.comment %></p>
-      <p><%=@users.find(topic.user_id).name %></p>
-      <%= profile_img(@users.find(topic.user_id)) if profile_img(@users.find(topic.user_id)) %>
+      <div class="u-space-t-L">
+        <%= profile_img(@users.find(topic.user_id)) if profile_img(@users.find(topic.user_id)) %>
+        <span class="u-space-l-S"><%=@users.find(topic.user_id).name %></span>
+      </div>
 
       <div class="text-right">
 

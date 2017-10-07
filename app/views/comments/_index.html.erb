@@ -1,8 +1,8 @@
-<ul>
+<ul class="topicTalk__list">
   <% comments.each do |comment| %>
     <% unless comment.id.nil? %>
-      <li>
-        <p class="left"><%= comment.user.name %>さんがコメントしました。</p>
+      <li class="c-group -space-S">
+        <p class="left"><strong><%= comment.user.name %></strong>さんがコメントしました。</p>
         <p class="left"><%= comment.content %></p>
         <% if current_user.id == comment.user.id %>
           <p class="right">

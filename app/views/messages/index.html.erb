@@ -2,32 +2,33 @@
     <%= link_to '以前のメッセージ', '?m=all' %>
 <% end %>
 
-<div class="ui segment">
-  <% @messages.each do |message| %>
+<section class="talk">
+  <h1>
+    <%= @user.name %>との会話
+  </h1>
+  <ul class="talk__body">
+    <% @messages.each do |message| %>
       <% if message.body %>
-          <% user = User.find(message.user_id) %>
-          <div class="item">
-            <div class="content">
-              <div class="header"><strong><%= user.name %></strong> <%= message.message_time %></div>
-              <div class="list">
-                <div class="item">
-                  <i class="right triangle icon"></i>
-                  <%= message.body %>
-                </div>
-              </div>
-            </div>
-          </div>
+        <% user = User.find(message.user_id) %>
+        <li>
+          <p><strong><%= user.name %></strong> <%= message.message_time %></p>
+          <p class="u-space-t-XS"><%= message.body %></p>
+        </li>
       <% end %>
-  <% end %>
-</div>
+    <% end %>
+  </ul>
 
-<%= form_for [@conversation, @message], html: {class: "ui reply form"} do |f| %>
+  <div class="u-space-t-XL">
+  <%= form_for [@conversation, @message], html: {class: ''} do |f| %>
     <div class="field">
-      <%= f.text_area :body, class: "form-control" %>
+      <%= f.text_area :body, class: 'form-control' %>
     </div>
-    <%= f.text_field :user_id, value: current_user.id, type: "hidden"  %>
-    <div>
-      <%= f.submit "メッセージを送る" %>
+    <%= f.text_field :user_id, value: current_user.id, type: 'hidden' %>
+    <div class="u-space-t-M">
+      <%= f.submit 'メッセージを送る', class: 'btn btn-primary btn-block' %>
     </div>
+  <% end %>
+  </div>
+</section>
 
-<% end %>
+

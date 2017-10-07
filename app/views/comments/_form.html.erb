@@ -2,10 +2,9 @@
   <% if comment.errors.any? %>
     <div id="error_explanation">
       <h2><%= comment.errors.count %>件のエラーがあります。</h2>
-
       <ul>
         <% comment.errors.full_messages.each do |msg| %>
-            <li><%= msg %></li>
+          <li><%= msg %></li>
         <% end %>
       </ul>
     </div>
@@ -14,7 +13,7 @@
   <div class="field">
     <%= f.text_field :content, placeholder: "内容", class: "form-control"  %>
   </div>
-  <div class="actions">
-    <%= f.submit %>
+  <div class="actions u-space-t-M">
+    <%= f.submit '投稿する', class: 'btn btn-primary btn-block' %>
   </div>
 <% end %>

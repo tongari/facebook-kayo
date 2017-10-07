@@ -1,3 +1,27 @@
 // Place all the styles related to the Messages controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+.message{
+
+  &__list{
+    margin-top: 40px;
+    display: flex;
+
+    > * {
+      margin-right: 30px;
+    }
+  }
+}
+
+.talk{
+
+  &__body{
+    margin-top: 40px;
+    > * {
+      margin-top: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #b7b1b1;
+    }
+  }
+}

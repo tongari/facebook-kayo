@@ -21,8 +21,14 @@ class MessagesController < ApplicationController
         @messages.last.read = true
       end
     end
-
     @message = @conversation.messages.build
+
+    if @conversation.sender_id != @current_user.id
+      @user = User.find(@conversation.sender_id)
+    elsif @conversation.recipient_id != @current_user.id
+      @user = User.find(@conversation.recipient_id)
+    end
+
   end
 
   def create

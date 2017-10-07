@@ -64,3 +64,17 @@
     text-align: center;
   }
 }
+
+.topicTalk{
+  &__body{
+    margin-top: 40px;
+  }
+
+  &__list{
+    > * {
+      margin-top: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #b7b1b1;
+    }
+  }
+}

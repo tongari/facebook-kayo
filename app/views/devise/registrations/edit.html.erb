@@ -1,7 +1,7 @@
-<%= alert %>
-<%= notice %>
 <section class="signBox c-group -space-M u-text-center">
   <h1>アカウント設定</h1>
+  <%= alert %>
+  <%= notice %>
 
 <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
   <%= devise_error_messages! %>
