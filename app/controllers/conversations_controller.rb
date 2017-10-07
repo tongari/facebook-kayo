@@ -1,5 +1,8 @@
 class ConversationsController < ApplicationController
-  before_action :authenticate_user!
+  before_action do
+    :authenticate_user!
+    @current_user = current_user
+  end
 
   def index
     @users = User.all

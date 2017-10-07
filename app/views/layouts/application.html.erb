@@ -9,12 +9,29 @@
 <body>
 <header class="header">
   <div class="header__body">
+    <p>
+      <%= link_to topic_index_path do %>
+        <img src="<%= asset_path 'f-logo.svg' %>" width="200" alt="">
+      <% end %>
+    </p>
     <% if user_signed_in? %>
-        <%= link_to 'ログアウト', destroy_user_session_path, method: :delete ,data: { confirm: 'ログアウトしますか？' }, class: '' %>
-    <% else %>
-        <p>
-          <img src="<%= asset_path 'f-logo.svg' %>" width="200" alt="">
-        </p>
+      <nav>
+        <li>
+          <%= profile_img(@current_user) if @current_user %>
+        </li>
+        <li>
+          <%= link_to '友達一覧', users_path %>
+        </li>
+        <li>
+          <%= link_to 'メッセージ', conversations_path %>
+        </li>
+        <li>
+          <%= link_to 'アカウント設定', edit_user_registration_path %>
+        </li>
+        <li>
+          <%= link_to 'ログアウト', destroy_user_session_path, method: :delete ,data: { confirm: 'ログアウトしますか？' }%>
+        </li>
+      </nav>
     <% end %>
   </div>
 </header>

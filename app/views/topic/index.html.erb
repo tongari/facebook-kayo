@@ -15,6 +15,7 @@
       </div>
       <p><%= topic.comment %></p>
       <p><%=@users.find(topic.user_id).name %></p>
+      <%= profile_img(@users.find(topic.user_id)) if profile_img(@users.find(topic.user_id)) %>
 
       <div class="text-right">
 

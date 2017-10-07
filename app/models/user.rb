@@ -73,6 +73,11 @@ class User < ActiveRecord::Base
     relationships.find_by(followed_id: other_user.id)
   end
 
+  #フォローされているかどうかを確認する
+  def followering?(other_user)
+    reverse_relationships.find_by(follower_id: other_user.id)
+  end
+
   #指定のユーザのフォローを解除する
   def unfollow!(other_user)
     relationships.find_by(followed_id: other_user.id).destroy

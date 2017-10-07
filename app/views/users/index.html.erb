@@ -1,16 +1,68 @@
-<% @users.each do |user| %>
-  <% if user.id != current_user.id %>
-    <div>
-      <p><%= profile_img(user) %></p>
-      <p><%= user.name %></p>
-      <ul>
-        <li>
-          <%= link_to 'メッセージ', conversations_path(sender_id: current_user.id, recipient_id: user.id), method: 'post' %>
-        </li>
-        <li>
-          <%= render partial: 'follow_form', locals: {user: user} if signed_in? %>
-        </li>
-      </ul>
-    </div>
-  <% end %>
-<% end %>
+<section class="userList">
+  <h2 class="u-text-size-XL">フォローしているユーザ</h2>
+  <div class="userList__body">
+    <% @users.each do |user| %>
+        <% if user.id != current_user.id %>
+            <% if current_user.following?(user) %>
+                <div class="userList">
+                  <p><%= profile_img(user) %></p>
+                  <p><%= user.name %></p>
+                  <ul>
+                    <li>
+                      <%= link_to 'メッセージ', conversations_path(sender_id: current_user.id, recipient_id: user.id), method: 'post' %>
+                    </li>
+                    <li>
+                      <%= render partial: 'follow_form', locals: {user: user} if signed_in? %>
+                    </li>
+                  </ul>
+                </div>
+            <% end %>
+        <% end %>
+    <% end %>
+  </div>
+
+  <h2 class="u-text-size-XL u-space-t-XL">フォローされているユーザ</h2>
+  <div class="userList__body">
+    <% @users.each do |user| %>
+        <% if user.id != current_user.id %>
+          <% if current_user.followering?(user) %>
+              <div class="userList">
+                <p><%= profile_img(user) %></p>
+                <p><%= user.name %></p>
+                <ul>
+                  <li>
+                    <%= link_to 'メッセージ', conversations_path(sender_id: current_user.id, recipient_id: user.id), method: 'post' %>
+                  </li>
+                  <li>
+                    <%= render partial: 'follow_form', locals: {user: user} if signed_in? %>
+                  </li>
+                </ul>
+              </div>
+          <% end %>
+        <% end %>
+    <% end %>
+  </div>
+  <h2 class="u-text-size-XL">まだフォローしていないユーザ</h2>
+  <div class="userList__body">
+    <% @users.each do |user| %>
+        <% if user.id != current_user.id %>
+            <% unless current_user.following?(user) %>
+                <div class="userList">
+                  <p><%= profile_img(user) %></p>
+                  <p><%= user.name %></p>
+                  <ul>
+                    <li>
+                      <%= link_to 'メッセージ', conversations_path(sender_id: current_user.id, recipient_id: user.id), method: 'post' %>
+                    </li>
+                    <li>
+                      <%= render partial: 'follow_form', locals: {user: user} if signed_in? %>
+                    </li>
+                  </ul>
+                </div>
+            <% end %>
+        <% end %>
+    <% end %>
+  </div>
+</section>
+
+

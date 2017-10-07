@@ -1,6 +1,7 @@
 class MessagesController < ApplicationController
   before_action do
     @conversation = Conversation.find(params[:conversation_id])
+    @current_user = current_user
   end
 
   def index
