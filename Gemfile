@@ -31,9 +31,11 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
-group :development do
-  gem 'dotenv-rails'
-end
+# group :development do
+#   gem 'dotenv-rails'
+# end
+
+gem 'therubyracer', platforms: :ruby
 
 group :development, :test do
   gem 'letter_opener_web'
@@ -45,6 +47,12 @@ group :development, :test do
 
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
+
+  gem 'capistrano', '3.6.0'
+  gem 'capistrano-bundler'
+  gem 'capistrano-rails'
+  gem 'capistrano-rbenv'
+  gem 'capistrano3-unicorn'
 end
 
 gem 'devise'
@@ -57,3 +65,6 @@ gem 'mini_magick'
 gem 'omniauth'
 gem 'omniauth-twitter'
 gem 'omniauth-facebook'
+gem 'fog'
+gem 'dotenv-rails'
+gem 'unicorn'
