@@ -12,10 +12,10 @@ CarrierWave.configure do |config|
 
   case Rails.env
     when 'production'
-      config.fog_directory = 'tongari-achieve-prod'
-      config.asset_host = 'https://s3-ap-northeast-1.amazonaws.com/tongari-achieve-prod'
+      config.fog_directory = 'facebook-kayo-prod'
+      config.asset_host = 'https://s3-ap-northeast-1.amazonaws.com/facebook-kayo-prod'
     when 'development'
-      config.fog_directory = 'tongari-achieve-dev'
-      config.asset_host = 'https://s3-ap-northeast-1.amazonaws.com/tongari-achieve-dev'
+      config.fog_directory = 'facebook-kayo-dev'
+      config.asset_host = 'https://s3-ap-northeast-1.amazonaws.com/facebook-kayo--dev'
   end
 end

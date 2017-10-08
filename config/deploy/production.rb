@@ -60,5 +60,5 @@
 #     # password: 'please use keys'
 #   }
 
-server '54.178.198.89', user: 'app', roles: %w{app db web}
+server '13.115.11.30', user: 'app', roles: %w{app db web}
 set :ssh_options, keys: '/Users/tongari/.ssh/aws'
