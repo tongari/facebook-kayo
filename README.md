@@ -1466,3 +1466,12 @@ end
 
 <% end %>
 ```
+
+
+# AWSでの DBリセットなど
+`/var/www/facebook-kayo/current`ディレクトリにて
+```bash
+bundle exec rake db:migrate RAILS_ENV=production
+```
+
+`RAILS_ENV=production`のenvをつけるの、重要！！！
