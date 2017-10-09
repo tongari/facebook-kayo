@@ -1468,10 +1468,45 @@ end
 ```
 
 
-# AWSでの DBリセットなど
+# AWS関連
+
+- DBリセット
 `/var/www/facebook-kayo/current`ディレクトリにて
 ```bash
 bundle exec rake db:migrate RAILS_ENV=production
 ```
 
 `RAILS_ENV=production`のenvをつけるの、重要！！！
+
+- AWSのnginxのアップロード許容サイズの上限値を変更
+`sudo vi /etc/nginx/conf.d/facebook-kayo.conf`
+```
+upstream unicorn {
+  server unix:/var/www/facebook-kayo/shared/tmp/sockets/unicorn.sock;
+}
+
+server {
+  client_max_body_size 20M; <- これを追加
+  listen       80;
+  server_name  13.115.11.30;
+    
+    
+  root /var/www/facebook-kayo/shared/public;
+    
+    access_log /var/log/nginx/facebook-kayo_access.log;
+    error_log /var/log/nginx/facebook-kayo_error.log;
+    
+    location ~ ^/assets/ {
+    }
+    
+    location / {
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header Host $http_host;
+      proxy_pass http://unicorn;
+    }
+  }
+```
+`nginx再起動`
+
+`sudo nginx -s reload`

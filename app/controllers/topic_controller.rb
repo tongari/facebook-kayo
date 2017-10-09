@@ -5,7 +5,7 @@ class TopicController < ApplicationController
   before_action :checkMatchUser, only:[:edit, :destroy]
 
   def index
-    @topics = Topic.all;
+    @topics = Topic.all.order('updated_at DESC');
     @curUserId = current_user.id
     @users = User.all
   end
