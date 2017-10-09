@@ -11,15 +11,16 @@ Rails.application.routes.draw do
     registrations: "users/registrations",
     omniauth_callbacks: 'users/omniauth_callbacks'
   }
-  if Rails.env.development?
-    mount LetterOpenerWeb::Engine, at: '/letter_opener'
-  end
 
   #devise_forより以下に記述すること
   resources :users, only: [:index]
   resources :relationships, only: [:create, :destroy]
   resources :conversations do
     resources :messages
+  end
+
+  if Rails.env.development?
+    mount LetterOpenerWeb::Engine, at: '/letter_opener'
   end
 
   root 'application#index'
