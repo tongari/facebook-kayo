@@ -16,6 +16,6 @@ CarrierWave.configure do |config|
       config.asset_host = 'https://s3-ap-northeast-1.amazonaws.com/facebook-kayo-prod'
     when 'development'
       config.fog_directory = 'facebook-kayo-dev'
-      config.asset_host = 'https://s3-ap-northeast-1.amazonaws.com/facebook-kayo--dev'
+      config.asset_host = 'https://s3-ap-northeast-1.amazonaws.com/facebook-kayo-dev'
   end
 end
